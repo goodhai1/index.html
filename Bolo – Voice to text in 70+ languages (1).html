@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Bolo – Voice to text in 70+ languages</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;800&family=Mukta:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#E6EFEE;--card:#fff;--ink:#10242B;--mut:#4C6168;--line:#C3D4D2;--brand:#0E5560;--on:#fff;--gold:#F2A900;--goldink:#10242B;--danger:#B3261E;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0B1A1F;--card:#12282F;--ink:#E6F1EF;--mut:#93ACB2;--line:#26434B;--brand:#5CD1C8;--on:#0B1A1F;--danger:#FF8A80}}
+:root[data-theme="dark"]{--bg:#0B1A1F;--card:#12282F;--ink:#E6F1EF;--mut:#93ACB2;--line:#26434B;--brand:#5CD1C8;--on:#0B1A1F;--danger:#FF8A80}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:400 17px/1.55 Mukta,"Noto Sans Devanagari",system-ui,sans-serif;min-height:100%}
+.wrap{max-width:760px;margin:0 auto;padding:20px 16px 48px}
+h1{font:800 clamp(2.2rem,8vw,3.4rem)/1 "Bricolage Grotesque",Mukta,sans-serif;margin:8px 0 6px;letter-spacing:-.02em}
+.sub{color:var(--mut);margin:0 0 22px;max-width:46ch}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px}
+.top{display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+#mic{width:112px;height:112px;border-radius:50%;border:0;background:var(--brand);color:var(--on);display:grid;place-items:center;cursor:pointer;flex:none;position:relative;transition:transform .15s}
+#mic:active{transform:scale(.95)}
+#mic svg{width:44px;height:44px}
+#mic.on{background:var(--gold);color:var(--goldink);animation:pulse 1.6s infinite}
+#mic:disabled{opacity:.4;cursor:not-allowed}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(242,169,0,.55)}100%{box-shadow:0 0 0 26px rgba(242,169,0,0)}}
+:focus-visible{outline:3px solid var(--brand);outline-offset:3px}
+.ctl{flex:1;min-width:220px;display:grid;gap:8px}
+label{font-weight:600;font-size:.9rem;color:var(--mut)}
+select,input[type=search],textarea{width:100%;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.bars{display:flex;gap:4px;align-items:center;height:22px}
+.bars i{width:5px;height:6px;border-radius:3px;background:var(--line);transition:background .2s}
+.on-wrap .bars i{background:var(--gold);animation:bar 1s infinite ease-in-out}
+.bars i:nth-child(2){animation-delay:.15s!important}.bars i:nth-child(3){animation-delay:.3s!important}.bars i:nth-child(4){animation-delay:.45s!important}.bars i:nth-child(5){animation-delay:.6s!important}
+@keyframes bar{0%,100%{height:6px}50%{height:22px}}
+#stat{font-size:.95rem;color:var(--mut);display:flex;gap:10px;align-items:center}
+textarea{margin-top:16px;min-height:220px;resize:vertical;font-size:1.15rem;line-height:1.6;background:var(--card)}
+#live{min-height:1.6em;color:var(--mut);font-style:italic;padding:4px 2px}
+.bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px}
+.bar .sp{flex:1}
+button.b{font:600 .95rem Mukta,sans-serif;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;padding:8px 14px;cursor:pointer}
+button.b:hover{border-color:var(--brand)}
+button.p{background:var(--brand);color:var(--on);border-color:var(--brand)}
+#cnt{color:var(--mut);font-size:.9rem}
+h2{font:600 1.15rem "Bricolage Grotesque",Mukta,sans-serif;margin:28px 0 10px}
+.clip{display:grid;gap:6px;border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:10px;background:var(--card)}
+.clip p{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.clip small{color:var(--mut)}
+.empty{color:var(--mut)}
+#warn{display:none;border:1px solid var(--danger);color:var(--danger);border-radius:12px;padding:12px 14px;margin-bottom:14px;background:var(--card)}
+#toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:10px;opacity:0;pointer-events:none;transition:opacity .2s;max-width:90vw;text-align:center}
+#toast.s{opacity:1}
+.note{color:var(--mut);font-size:.9rem;margin-top:26px}
+.note p{margin:6px 0}
+@media (prefers-reduced-motion:reduce){#mic.on,.on-wrap .bars i{animation:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Bolo.</h1>
+  <p class="sub">Speak in your own language. Your words appear as text, ready to copy.</p>
+  <div id="warn" role="alert"></div>
+  <section class="card" id="app">
+    <div class="top">
+      <button id="mic" aria-label="Start listening" aria-pressed="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>
+      </button>
+      <div class="ctl">
+        <label for="q">Language</label>
+        <input id="q" type="search" placeholder="Search: Hindi, தமிழ், Español…" autocomplete="off">
+        <select id="lang" aria-label="Choose language"></select>
+        <div id="stat" aria-live="polite"><span class="bars" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span><span id="st">Tap the mic to start</span></div>
+      </div>
+    </div>
+    <textarea id="txt" dir="auto" placeholder="Your text appears here. You can also type or edit."></textarea>
+    <div id="live" aria-hidden="true"></div>
+    <div class="bar">
+      <button class="b p" id="copy">Copy</button>
+      <button class="b" id="save">Save clip</button>
+      <button class="b" id="read">Read aloud</button>
+      <button class="b" id="share" hidden>Share</button>
+      <button class="b" id="clear">Clear</button>
+      <span class="sp"></span>
+      <span id="cnt">0 words</span>
+    </div>
+  </section>
+
+  <h2>Saved clips</h2>
+  <div id="clips"></div>
+
+  <div class="note">
+    <p><b>Hinglish:</b> choose English (India) for Roman letters, or Hindi for Devanagari.</p>
+    <p><b>Bhojpuri, Maithili and similar:</b> browsers don't offer these yet. Pick Hindi, which is the closest match.</p>
+    <p><b>Privacy:</b> audio is processed by your browser's speech service (Google in Chrome and Edge, Apple in Safari), so an internet connection is needed. Your text and clips stay on this device.</p>
+  </div>
+</div>
+<div id="toast" role="status"></div>
+
+<script>
+(()=>{
+const L=[["hi-IN","हिन्दी · Hindi"],["en-IN","English (India)"],["bn-IN","বাংলা · Bengali"],["ta-IN","தமிழ் · Tamil"],["te-IN","తెలుగు · Telugu"],["mr-IN","मराठी · Marathi"],["gu-IN","ગુજરાતી · Gujarati"],["kn-IN","ಕನ್ನಡ · Kannada"],["ml-IN","മലയാളം · Malayalam"],["pa-Guru-IN","ਪੰਜਾਬੀ · Punjabi"],["ur-IN","اردو · Urdu (India)"],["ur-PK","اردو · Urdu (Pakistan)"],["ne-NP","नेपाली · Nepali"],["si-LK","සිංහල · Sinhala"],["en-US","English (US)"],["en-GB","English (UK)"],["en-AU","English (Australia)"],["ar-SA","العربية · Arabic"],["ar-EG","العربية · Arabic (Egypt)"],["he-IL","עברית · Hebrew"],["fa-IR","فارسی · Persian"],["tr-TR","Türkçe · Turkish"],["ru-RU","Русский · Russian"],["uk-UA","Українська · Ukrainian"],["pl-PL","Polski · Polish"],["cs-CZ","Čeština · Czech"],["sk-SK","Slovenčina · Slovak"],["de-DE","Deutsch · German"],["fr-FR","Français · French"],["es-ES","Español · Spanish (Spain)"],["es-MX","Español · Spanish (Mexico)"],["pt-BR","Português · Portuguese (Brazil)"],["pt-PT","Português · Portuguese (Portugal)"],["it-IT","Italiano · Italian"],["nl-NL","Nederlands · Dutch"],["sv-SE","Svenska · Swedish"],["nb-NO","Norsk · Norwegian"],["da-DK","Dansk · Danish"],["fi-FI","Suomi · Finnish"],["is-IS","Íslenska · Icelandic"],["el-GR","Ελληνικά · Greek"],["ro-RO","Română · Romanian"],["hu-HU","Magyar · Hungarian"],["bg-BG","Български · Bulgarian"],["hr-HR","Hrvatski · Croatian"],["sr-RS","Српски · Serbian"],["bs-BA","Bosanski · Bosnian"],["sl-SI","Slovenščina · Slovenian"],["mk-MK","Македонски · Macedonian"],["sq-AL","Shqip · Albanian"],["lt-LT","Lietuvių · Lithuanian"],["lv-LV","Latviešu · Latvian"],["et-EE","Eesti · Estonian"],["ca-ES","Català · Catalan"],["eu-ES","Euskara · Basque"],["gl-ES","Galego · Galician"],["zh-CN","中文 · Chinese (Mandarin)"],["zh-TW","中文 · Chinese (Taiwan)"],["yue-Hant-HK","粵語 · Cantonese"],["ja-JP","日本語 · Japanese"],["ko-KR","한국어 · Korean"],["th-TH","ไทย · Thai"],["vi-VN","Tiếng Việt · Vietnamese"],["id-ID","Bahasa Indonesia"],["ms-MY","Bahasa Melayu · Malay"],["fil-PH","Filipino"],["km-KH","ខ្មែរ · Khmer"],["lo-LA","ລາວ · Lao"],["my-MM","မြန်မာ · Burmese"],["ka-GE","ქართული · Georgian"],["hy-AM","Հայերեն · Armenian"],["az-AZ","Azərbaycan · Azerbaijani"],["kk-KZ","Қазақша · Kazakh"],["uz-UZ","Oʻzbek · Uzbek"],["sw-KE","Kiswahili · Swahili"],["af-ZA","Afrikaans"],["zu-ZA","isiZulu · Zulu"],["am-ET","አማርኛ · Amharic"]];
+const $=s=>document.querySelector(s);
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+const sel=$('#lang'),q=$('#q'),txt=$('#txt'),live=$('#live'),mic=$('#mic'),st=$('#st'),cnt=$('#cnt'),clipsEl=$('#clips'),toast=$('#toast'),app=$('#app');
+const store={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+let rec=null,want=false,lang=store.get('bolo.lang','hi-IN'),clips=store.get('bolo.clips',[]),tt;
+if(!L.some(x=>x[0]===lang))lang='hi-IN';
+txt.value=store.get('bolo.draft','');
+
+function fill(f){f=(f||'').toLowerCase().trim();sel.innerHTML='';
+  L.filter(x=>!f||x[1].toLowerCase().includes(f)||x[0].toLowerCase().includes(f)).forEach(x=>{const o=document.createElement('option');o.value=x[0];o.textContent=x[1];sel.appendChild(o)});
+  if([...sel.options].some(o=>o.value===lang))sel.value=lang}
+function say(m){toast.textContent=m;toast.classList.add('s');clearTimeout(tt);tt=setTimeout(()=>toast.classList.remove('s'),2600)}
+function ui(on){mic.classList.toggle('on',on);app.classList.toggle('on-wrap',on);mic.setAttribute('aria-pressed',on);mic.setAttribute('aria-label',on?'Stop listening':'Start listening');st.textContent=on?'Listening… speak now':'Tap the mic to start'}
+function count(){const v=txt.value.trim();const w=v?v.split(/\s+/).length:0;cnt.textContent=w+(w===1?' word · ':' words · ')+v.length+' characters';store.set('bolo.draft',txt.value)}
+function append(t){t=t.trim();if(!t)return;const v=txt.value;txt.value=v+(v&&!/\s$/.test(v)?' ':'')+t;txt.scrollTop=txt.scrollHeight;count()}
+const errs={'not-allowed':'Microphone is blocked. Allow mic access for this site, or open the page in its own tab.','service-not-allowed':'Microphone is blocked. Allow mic access for this site, or open the page in its own tab.','audio-capture':'No microphone found. Plug one in and try again.','network':'Cannot reach the speech service. Check your internet connection.','language-not-supported':'This browser cannot recognise that language. Try Chrome or Edge.'};
+
+function start(){
+  rec=new SR();rec.lang=lang;rec.continuous=true;rec.interimResults=true;rec.maxAlternatives=1;
+  rec.onstart=()=>ui(true);
+  rec.onresult=e=>{let it='';for(let i=e.resultIndex;i<e.results.length;i++){const r=e.results[i];if(r.isFinal)append(r[0].transcript);else it+=r[0].transcript}live.textContent=it};
+  rec.onerror=e=>{if(e.error==='no-speech'||e.error==='aborted')return;want=false;say(errs[e.error]||('Speech error: '+e.error))};
+  rec.onend=()=>{live.textContent='';if(want){try{rec.start()}catch(_){setTimeout(()=>{if(want)start()},300)}}else ui(false)};
+  try{rec.start()}catch(e){}
+}
+function stop(){want=false;if(rec)try{rec.stop()}catch(e){}}
+function restart(){if(!want||!rec)return;const r=rec;r.onend=null;r.onresult=null;r.onerror=null;try{r.abort()}catch(e){}start()}
+
+mic.onclick=()=>{if(want){stop()}else{if(window.speechSynthesis)speechSynthesis.cancel();want=true;start()}};
+q.oninput=()=>fill(q.value);
+sel.onchange=()=>{lang=sel.value;store.set('bolo.lang',lang);txt.lang=lang;restart();say('Language: '+sel.options[sel.selectedIndex].textContent)};
+txt.oninput=count;
+
+$('#copy').onclick=async()=>{const v=txt.value;if(!v)return say('Nothing to copy yet');
+  try{await navigator.clipboard.writeText(v);say('Copied')}catch(e){txt.select();try{document.execCommand('copy');say('Copied')}catch(_){say('Copy failed. Select the text and copy manually.')}}};
+$('#save').onclick=()=>{const v=txt.value.trim();if(!v)return say('Nothing to save yet');clips.unshift({t:v,l:sel.options[sel.selectedIndex]?sel.options[sel.selectedIndex].textContent:lang,d:new Date().toLocaleString()});clips=clips.slice(0,50);store.set('bolo.clips',clips);render();say('Clip saved')};
+$('#clear').onclick=()=>{if(txt.value&&!confirm('Clear the text box?'))return;txt.value='';live.textContent='';count()};
+$('#read').onclick=()=>{const s=window.speechSynthesis;if(!s)return say('Read aloud is not supported here');if(s.speaking){s.cancel();return}if(!txt.value.trim())return say('Nothing to read yet');const u=new SpeechSynthesisUtterance(txt.value);u.lang=lang;s.speak(u)};
+if(navigator.share){const b=$('#share');b.hidden=false;b.onclick=()=>{if(!txt.value.trim())return say('Nothing to share yet');navigator.share({text:txt.value}).catch(()=>{})}}
+
+function render(){clipsEl.innerHTML='';
+  if(!clips.length){const p=document.createElement('p');p.className='empty';p.textContent='No clips yet. Save a transcript and it will show up here.';clipsEl.appendChild(p);return}
+  clips.forEach((c,i)=>{const d=document.createElement('div');d.className='clip';
+    const p=document.createElement('p');p.textContent=c.t;p.dir='auto';
+    const s=document.createElement('small');s.textContent=c.l+' · '+c.d;
+    const r=document.createElement('div');r.className='bar';r.style.marginTop='4px';
+    [['Open','open'],['Copy','copy'],['Delete','del']].forEach(a=>{const b=document.createElement('button');b.className='b';b.textContent=a[0];b.dataset.a=a[1];b.dataset.i=i;r.appendChild(b)});
+    d.append(p,s,r);clipsEl.appendChild(d)})}
+clipsEl.onclick=async e=>{const b=e.target.closest('button');if(!b)return;const i=+b.dataset.i,c=clips[i];if(!c)return;
+  if(b.dataset.a==='open'){txt.value=c.t;count();window.scrollTo({top:0,behavior:'smooth'})}
+  else if(b.dataset.a==='copy'){try{await navigator.clipboard.writeText(c.t);say('Copied')}catch(_){say('Copy failed')}}
+  else{clips.splice(i,1);store.set('bolo.clips',clips);render()}};
+
+if(!SR){const w=$('#warn');w.style.display='block';w.textContent='This browser does not support speech recognition. Open Bolo in Chrome, Edge or Safari. You can still type and use the other tools.';mic.disabled=true;st.textContent='Speech recognition unavailable'}
+txt.lang=lang;fill('');render();count();
+})();
+</script>
+</body>
+</html>
